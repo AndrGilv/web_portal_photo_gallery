@@ -118,6 +118,30 @@ $(document).ready(function ()
 
     });
 
+    $(document).on('click', '.deleteCommentBtn',  function(event){
+        event.preventDefault();
+
+        var idString = $(this).attr('id');
+        var commentId = idString.replace("comment_", "");
+        // var photoCardId = "photo_card_" + photoId;
+        console.log("id value = ",commentId);
+
+        $.ajax({
+            type:'post',
+            url: "/delete_comment",
+            data: {commentId:commentId},
+            dataType: 'json',
+            success: (data) => {
+                alert('Комментарий удалён успешно!')
+                $("#"+commentId).remove();
+            },
+            error: function(data){
+                console.log(data);
+            }
+        });
+
+    });
+
     $(document).on('click', '.save_photo_btn',  function(event){
         event.preventDefault();
 
@@ -357,6 +381,81 @@ $(document).ready(function ()
         });
     });
 
+    $(document).on('click', '.admin_show_first_comments',  function(event){
+        event.preventDefault();
+        var idString = $(this).attr('id');
+        var id = idString.replace("show_first_comments", "");
+        var commentsDivId = "comments" + id;
+        var userId = $('meta[name="user-id"]').attr('content')
+        jQuery.ajax({
+            type : 'GET',
+            url : `/photo/${id}/first_comments`,
+            success : function (data) {
+
+                $(commentsDivId).empty();
+                var commentsHtml = "<p>Комментарии</p>";
+                if(userId !== ""){
+                    commentsHtml += `<form id="send_comment_form_${id}">
+                                        <div class="form-group">
+<!--                                            <label for="commentText${id}">Комментарий</label>-->
+                                            <input type="text" class="form-control comment_text" id="commentText${id}" placeholder="Ваш комментарий...">
+                                        </div>
+                                        <input hidden type="text" class="comment_photo_id" value="${id}">
+                                        <input hidden type="text" class="comment_user_id" value="${userId}">
+                                        <button type="submit" class="btn btn-primary send_comment_btn" id="send_comment_btn_${id}">Отправить комментарий</button>
+                                    </form>`;
+                }
+                commentsHtml += `<div class="p-2" id="comments_list_${id}">`;
+                if(data.length > 0){
+                    $.each(data, function (index, value) {
+                        console.log(value);
+                        commentsHtml += `<div class="mb-3" id="${value.id}">`+
+                            `<p class="m-0"><i>Пользователь: </i>${value.user.fio}</p>`+
+                            `<p class="m-0"><i>Дата: </i>${value.date}</p>`+
+                            `<p class="m-0"><i>Комментарий: </i>${value.comment}</p>
+                             <a class="btn btn-danger deleteCommentBtn" id="comment_${value.id}" style="background-color: darkred">Удалить комментарий</a></div>`;
+                    });
+                    if(data.length >= 3){
+                        commentsHtml += `</div> <button id="show_all_comments_btn_${id}" class="btn pt-2 admin_show_all_comments_btn">Показать весь список комментариев</button>`;
+                    }
+
+                }
+
+
+                /*$('#article_list').prepend('<tr id="line'+ article.id +'" style="display: flex">\n' +
+                    '                <td class="lineID">'+ article.id +'</td>\n' +
+                    '                <td class="lineTitle">'+ article.title +'</td>\n' +
+                    '                <td class="lineDesc">'+ article.description +'</td>\n' +
+                    '                <td class="lineAge">'+ age.name +'</td>\n' +
+                    '                <td class="lineKind">'+ kind.kind +'</td>\n' +
+                    '                <td>\n' +
+                    '                    <form  class="updateForm" style="display: inline-block;">\n' +
+                    /!*'                        <input type="hidden" name="_method" value="PUT">\n' +*!/
+                    '                        <input class="updateId" type="hidden" name="id" value='+ article.id +'>\n' +
+                    '                        <button class="updateBtn" type="submit" style="outline: none;  border: 0; background: transparent;  ">\n' +
+                    '                            <span class="glyphicon  glyphicon-pencil" style="color: #2a6496"></span>\n' +
+                    '                        </button>\n' +
+                    '                    </form>\n' +
+                    '                    <form  class="deleteForm" style="display: inline-block;">\n' +
+                    /!* '                        <input type="hidden" name="_method" value="DELETE">\n' +*!/
+                    '                        <input class="deleteId" type="hidden" name="id" value='+ article.id +'>\n' +
+                    '                        <button class="deleteBtn" type="submit" style="outline: none;  border: 0; background: transparent;  ">\n' +
+                    '                            <span class="glyphicon  glyphicon-remove" style="color: #2a6496"></span>\n' +
+                    '                        </button>\n' +
+                    '                    </form>\n' +
+                    '                </td>\n' +
+                    '            </tr>');
+                $('#title').val('')
+                $('#description').val('')*/
+                console.log(commentsHtml);
+                $(`#${commentsDivId}`).html(commentsHtml);
+            },
+            error: function (JSONrequest, status, error) {
+                var request = jQuery.parseJSON( JSONrequest.responseText );
+                alert(request.message);
+            }
+        });
+    });
 
     $(document).on('click', '.show_first_comments',  function(event){
         event.preventDefault();
@@ -500,6 +599,75 @@ $(document).ready(function ()
             }
         });
     });
+    $(document).on('click', '.admin_show_all_comments_btn',  function(event) {
+
+        event.preventDefault();
+        var idString = $(this).attr('id');
+        var id = idString.replace("show_all_comments_btn_", "");
+        var commentsDivId = "comments_list_" + id;
+        jQuery.ajax({
+            type : 'GET',
+            url : `/photo/${id}/all_comments`,
+            success : function (data) {
+
+                $(commentsDivId).empty();
+                var commentsHtml = "";
+                $.each(data, function (index, value) {
+                    console.log(value);
+                    commentsHtml += `<div class="mb-3" id="${value.id}">`+
+                        `<p class="m-0"><i>Пользователь: </i>${value.user.fio}</p>`+
+                        `<p class="m-0"><i>Дата: </i>${value.date}</p>`+
+                        `<p class="m-0"><i>Комментарий: </i>${value.comment}</p>
+                        <a class="btn btn-danger deleteCommentBtn" id="comment_${value.id}" style="background-color: darkred">Удалить комментарий</a>
+                    </div>`;
+                    /*{{--<p>Комментарии</p>
+                    @for($i = 0; $i < ($photo->comments->count() > 5? 5 : $photo->comments->count()); $i++)
+                    <div class="mb-3" id="{{$photo->comments[$i]->id}}">
+                            <p class="m-0"><i>Пользователь: </i>{{$photo->comments[$i]->user->fio}}</p>
+                        <p class="m-0"><i>Дата: </i>{{$photo->comments[$i]->date}}</p>
+                        <p class="m-0"><i>Комментарий: </i>{{$photo->comments[$i]->comment}}</p>
+                        </div>
+
+                    @endfor
+                    <button id="show_all_comments_btn_{{$photo->id}}" class="btn pt-2 show_all_comments_btn">Показать весь список комментариев</button>--}}*/
+                });
+
+
+                /*$('#article_list').prepend('<tr id="line'+ article.id +'" style="display: flex">\n' +
+                    '                <td class="lineID">'+ article.id +'</td>\n' +
+                    '                <td class="lineTitle">'+ article.title +'</td>\n' +
+                    '                <td class="lineDesc">'+ article.description +'</td>\n' +
+                    '                <td class="lineAge">'+ age.name +'</td>\n' +
+                    '                <td class="lineKind">'+ kind.kind +'</td>\n' +
+                    '                <td>\n' +
+                    '                    <form  class="updateForm" style="display: inline-block;">\n' +
+                    /!*'                        <input type="hidden" name="_method" value="PUT">\n' +*!/
+                    '                        <input class="updateId" type="hidden" name="id" value='+ article.id +'>\n' +
+                    '                        <button class="updateBtn" type="submit" style="outline: none;  border: 0; background: transparent;  ">\n' +
+                    '                            <span class="glyphicon  glyphicon-pencil" style="color: #2a6496"></span>\n' +
+                    '                        </button>\n' +
+                    '                    </form>\n' +
+                    '                    <form  class="deleteForm" style="display: inline-block;">\n' +
+                    /!* '                        <input type="hidden" name="_method" value="DELETE">\n' +*!/
+                    '                        <input class="deleteId" type="hidden" name="id" value='+ article.id +'>\n' +
+                    '                        <button class="deleteBtn" type="submit" style="outline: none;  border: 0; background: transparent;  ">\n' +
+                    '                            <span class="glyphicon  glyphicon-remove" style="color: #2a6496"></span>\n' +
+                    '                        </button>\n' +
+                    '                    </form>\n' +
+                    '                </td>\n' +
+                    '            </tr>');
+                $('#title').val('')
+                $('#description').val('')*/
+                console.log(commentsHtml);
+                $(`#${commentsDivId}`).html(commentsHtml);
+                $(`#show_all_comments_btn_${id}`).hide();
+            },
+            error: function (JSONrequest, status, error) {
+                var request = jQuery.parseJSON( JSONrequest.responseText );
+                alert(request.message);
+            }
+        });
+    });
 
     $(document).on('click', '.send_comment_btn',  function(event){
         event.preventDefault();
@@ -534,6 +702,7 @@ $(document).ready(function ()
                                                 <p class="m-0"><i>Пользователь: </i>${userFio}</p>
                                                 <p class="m-0"><i>Дата: </i>${comment.date}</p>
                                                 <p class="m-0"><i>Комментарий: </i>${comment.comment}</p>
+                                                <a class="btn btn-danger deleteCommentBtn" id="comment_${comment.id}" style="background-color: darkred">Удалить комментарий</a>
                                             </div>`);
 
 

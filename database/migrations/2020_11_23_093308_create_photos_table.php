@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreatePhotosTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         $this->down();
@@ -28,13 +23,7 @@ class CreatePhotosTable extends Migration
             $table->foreignId('category_id');
         });
     }
-
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+ function down()
     {
         Schema::dropIfExists('photos');
     }

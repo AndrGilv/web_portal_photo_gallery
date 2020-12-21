@@ -30,7 +30,6 @@
     <body class="font-sans antialiased">
         @yield('header')
         @yield('body')
-
         @yield('footer')
     </body>
 </html>

@@ -63,6 +63,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/edit_photo', [PhotoController::class, 'editPhoto'])->name('edit_photo');
     Route::post('/delete_photo', [PhotoController::class, 'deletePhoto'])->name('delete_photo');
 
+    Route::post('/delete_comment', [CommentsController::class, 'deleteComment'])->name('delete_comment');
 
 
     Route::middleware(['role:admin'])->group(function () {//admin

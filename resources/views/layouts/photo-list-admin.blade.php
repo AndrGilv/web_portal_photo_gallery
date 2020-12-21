@@ -36,6 +36,12 @@
                                         <a class="btn btn-secondary mr-3" href="/edit_photo/{{$photo->id}}">Отредактировать фото</a>
                                         <a class="btn btn-danger deletePhotoBtn" id="photo_{{$photo->id}}" >Удалить фото</a>
                                     </div>
+                                    <hr/>
+
+                                    <div id="comments{{$photo->id}}">
+                                        <button id="show_first_comments{{$photo->id}}" class="btn btn-primary admin_show_first_comments">Раскрыть комментарии к фото</button>
+
+                                    </div>
 
                                 </div>
 

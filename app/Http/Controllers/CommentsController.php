@@ -44,4 +44,11 @@ class CommentsController extends Controller
         echo json_encode($data);
     }
 
+    public function deleteComment(){
+        $id = $_POST['commentId'];
+        $comment = Comment::find($id);
+        $comment->delete();
+        echo json_encode(['data'=>'Комментарий удалён']);
+    }
+
 }
